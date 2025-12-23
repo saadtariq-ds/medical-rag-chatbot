@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🩺 AI Medical Chatbot</title>
+
+  <style>
+    :root{
+      --bg1:#0f172a;      /* slate-900 */
+      --bg2:#111827;      /* gray-900 */
+      --card:#0b1220cc;   /* glass */
+      --border:#1f2a44;
+      --text:#e5e7eb;     /* gray-200 */
+      --muted:#9ca3af;    /* gray-400 */
+      --user:#2563eb;     /* blue-600 */
+      --assistant:#111827;/* gray-900 */
+      --assistantBubble:#0b1220;
+      --shadow: 0 20px 60px rgba(0,0,0,.35);
+      --radius: 18px;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color:var(--text);
+      background:
+        radial-gradient(1200px 600px at 10% 10%, rgba(59,130,246,.20), transparent 55%),
+        radial-gradient(900px 500px at 90% 20%, rgba(16,185,129,.16), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      min-height:100vh;
+      padding: 28px 16px;
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+    }
+
+    .chat-container{
+      width: min(900px, 100%);
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,.08);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      overflow:hidden;
+    }
+
+    /* Header */
+    .header{
+      padding: 18px 18px 14px 18px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      display:flex;
+      gap:14px;
+      align-items:center;
+      justify-content:space-between;
+      background: linear-gradient(90deg, rgba(37,99,235,.18), rgba(16,185,129,.10));
+    }
+
+    .brand{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      min-width:0;
+    }
+
+    .logo{
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display:grid;
+      place-items:center;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+    }
+
+    .title-wrap{ min-width:0; }
+    h1{
+      margin:0;
+      font-size: 1.05rem;
+      letter-spacing: .2px;
+      line-height:1.2;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .subtitle{
+      margin-top:4px;
+      font-size: .85rem;
+      color: var(--muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .header-actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+
+    .badge{
+      font-size:.8rem;
+      color: var(--muted);
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      display:none;
+    }
+    @media (min-width: 720px){
+      .badge{ display:inline-flex; }
+    }
+
+    /* Error */
+    .error{
+      padding: 12px 18px;
+      margin: 0;
+      color: #fecaca;
+      background: rgba(239,68,68,.10);
+      border-bottom: 1px solid rgba(239,68,68,.25);
+    }
+
+    /* Chat area */
+    .chat-box{
+      padding: 18px;
+      height: min(64vh, 620px);
+      overflow-y:auto;
+      scroll-behavior:smooth;
+    }
+
+    .chat-box::-webkit-scrollbar{ width: 10px; }
+    .chat-box::-webkit-scrollbar-thumb{
+      background: rgba(255,255,255,.10);
+      border-radius: 999px;
+      border: 2px solid transparent;
+      background-clip: content-box;
+    }
+
+    /* Message bubbles */
+    .row{
+      display:flex;
+      margin: 10px 0;
+    }
+    .row.user{ justify-content:flex-end; }
+    .row.assistant{ justify-content:flex-start; }
+
+    .bubble{
+      max-width: 82%;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.08);
+      box-shadow: 0 6px 18px rgba(0,0,0,.22);
+      line-height: 1.45;
+      word-wrap: break-word;
+      overflow-wrap:anywhere;
+    }
+    .row.user .bubble{
+      background: linear-gradient(180deg, rgba(37,99,235,.95), rgba(37,99,235,.72));
+      border-color: rgba(59,130,246,.35);
+      border-bottom-right-radius: 6px;
+    }
+    .row.assistant .bubble{
+      background: rgba(17,24,39,.65);
+      border-color: rgba(255,255,255,.08);
+      border-bottom-left-radius: 6px;
+    }
+
+    .meta{
+      margin-top: 6px;
+      font-size: .78rem;
+      color: rgba(229,231,235,.75);
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+    .role-pill{
+      font-size:.75rem;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      color: rgba(229,231,235,.9);
+    }
+
+    /* Composer */
+    .composer{
+      padding: 14px 18px 18px 18px;
+      border-top: 1px solid rgba(255,255,255,.08);
+      background: rgba(0,0,0,.12);
+    }
+
+    .input-wrap{
+      display:flex;
+      gap:10px;
+      align-items:flex-end;
+    }
+
+    textarea{
+      flex:1;
+      resize: vertical;
+      min-height: 52px;
+      max-height: 160px;
+      width: 100%;
+      padding: 12px 12px;
+      font-size: 1rem;
+      color: var(--text);
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 14px;
+      outline: none;
+    }
+    textarea:focus{
+      border-color: rgba(59,130,246,.55);
+      box-shadow: 0 0 0 4px rgba(59,130,246,.18);
+    }
+
+    .btn{
+      border: none;
+      cursor:pointer;
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-size: .95rem;
+      font-weight: 600;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      transition: transform .05s ease, opacity .2s ease, box-shadow .2s ease;
+      user-select:none;
+      white-space:nowrap;
+    }
+    .btn:active{ transform: translateY(1px); }
+
+    .btn-primary{
+      background: linear-gradient(180deg, rgba(59,130,246,1), rgba(37,99,235,1));
+      color: white;
+      box-shadow: 0 12px 26px rgba(37,99,235,.25);
+    }
+    .btn-primary:hover{ opacity:.95; }
+
+    .btn-ghost{
+      background: rgba(255,255,255,.05);
+      color: rgba(229,231,235,.9);
+      border: 1px solid rgba(255,255,255,.10);
+    }
+    .btn-ghost:hover{ opacity:.92; }
+
+    .footer-note{
+      margin-top: 10px;
+      font-size: .82rem;
+      color: var(--muted);
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    /* Small screens */
+    @media (max-width: 520px){
+      .bubble{ max-width: 92%; }
+      .badge{ display:none; }
+      .btn{ padding: 12px 12px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="chat-container">
+    <div class="header">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">🩺</div>
+        <div class="title-wrap">
+          <h1>AI Medical Chatbot</h1>
+          <div class="subtitle">Ask symptoms • get guidance • not a diagnosis</div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <span class="badge">Secure • Session Chat</span>
+        <form method="get" action="{{ url_for('clear') }}">
+          <button type="submit" class="btn btn-ghost" title="Clear chat">🧹 Clear</button>
+        </form>
+      </div>
+    </div>
+
+    {% if error %}
+      <p class="error">⚠️ {{ error }}</p>
+    {% endif %}
+
+    <div id="chat-box" class="chat-box">
+      {% if messages|length == 0 %}
+        <div class="row assistant">
+          <div class="bubble">
+            Hi! Tell me your symptoms, duration, age, and any meds/allergies.
+            <div class="meta">
+              <span class="role-pill">Assistant</span>
+              <span>•</span>
+              <span>Tips: “fever 2 days + sore throat”</span>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      {% for msg in messages %}
+        <div class="row {{ msg.role }}">
+          <div class="bubble">
+            {{ msg.content | safe | nl2br }}
+            <div class="meta">
+              <span class="role-pill">{{ msg.role|capitalize }}</span>
+              <!-- Optional: add timestamp in your backend and show it here -->
+              <!-- <span>•</span><span>{{ msg.time }}</span> -->
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="composer">
+      <form method="post" action="{{ url_for('index') }}">
+        <div class="input-wrap">
+          <textarea name="prompt" placeholder="Ask a medical question..." required></textarea>
+          <button type="submit" class="btn btn-primary">➤ Send</button>
+        </div>
+      </form>
+
+      <div class="footer-note">
+        <span>🧠 Educational guidance only — consult a doctor for diagnosis.</span>
+        <span>🚨 If severe symptoms (chest pain, trouble breathing), seek emergency care.</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
