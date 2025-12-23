@@ -71,7 +71,5 @@ pip install -r requirements.txt
 
 ## 4️⃣ Run Flask backend
 ```bash
-python src/api.py
+python src/app.py
 ```
-Open the UI:
-- Serve frontend/index.html (or integrate via Flask templates)
