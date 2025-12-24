@@ -183,3 +183,4 @@ cython_debug/
 # Other Files/Folders to Ignore
 logs/
 vector_store/
+.idea/
