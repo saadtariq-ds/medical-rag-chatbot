@@ -66,7 +66,7 @@ source venv/bin/activate   # Windows: venv\Scripts\activate
 
 ## 3️⃣ Install dependencies
 ```bash
-pip install -r requirements.txt
+pip install -e .
 ```
 
 ## 4️⃣ Run Flask backend
